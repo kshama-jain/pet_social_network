@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head('Posts')">
+</head>
+<body>
+<nav th:replace="fragments/layout :: navbar"></nav>
+
+<div class="container my-4">
+    <div th:replace="fragments/layout :: alerts"></div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-file-post"></i> All Posts</h2>
+                <a th:href="@{/posts/create}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Create Post
+                </a>
+            </div>
+
+            <!-- Posts List -->
+            <div th:if="${posts.empty}" class="card">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-file-earmark-x fs-1 text-muted"></i>
+                    <h4 class="mt-3">No Posts Found</h4>
+                    <p class="text-muted">There are no posts that match your criteria.</p>
+                    <a th:href="@{/posts}" class="btn btn-primary mt-2">Clear Filters</a>
+                </div>
+            </div>
+
+            <div th:unless="${posts.empty}" class="post-list">
+                <div th:each="post : ${posts}" class="card mb-4">
+                    <div class="card-header bg-white">
+                        <div class="d-flex align-items-center">
+                            <img th:if="${post.user.profilePicture}" th:src="${post.user.profilePicture}" class="rounded-circle me-2" width="40" height="40" alt="Profile Picture" style="object-fit: cover;">
+                            <img th:unless="${post.user.profilePicture}" th:src="@{/images/default-profile.png}" class="rounded-circle me-2" width="40" height="40" alt="Default Profile" style="object-fit: cover;">
+                            <div>
+                                <h6 class="mb-0">
+                                    <span th:text="${post.user.name}">User Name</span>
+                                </h6>
+                                <small class="text-muted" th:text="${#temporals.format(post.createdAt, 'MMM dd, yyyy h:mm a')}">Posted time</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${post.title}">Post Title</h5>
+                        <p class="card-text" th:text="${post.content}">Post content...</p>
+
+                        <!-- Media Content (Photo or Video) -->
+                        <div th:if="${post.mediaUrl != null}">
+                            <img th:if="${post.postType.name() == 'PHOTO'}" th:src="${post.mediaUrl}" class="img-fluid rounded mb-3" alt="Post Image">
+                            <video th:if="${post.postType.name() == 'VIDEO'}" controls class="img-fluid rounded mb-3">
+                                <source th:src="${post.mediaUrl}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+
+                        <!-- Featured Pets -->
+                        <div th:if="${!post.featuredPets.empty}" class="mb-3">
+                            <span class="badge bg-primary">Featured Pets:</span>
+                            <span th:each="pet : ${post.featuredPets}" class="badge bg-secondary me-1">
+                                    <i class="bi bi-github"></i> <span th:text="${pet.name}">Pet Name</span>
+                                </span>
+                        </div>
+                    </div>
+
+                    <div class="card-footer bg-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <button th:if="${!post.likedBy.contains(user)}" class="btn btn-sm btn-outline-primary me-2 like-btn" th:data-post-id="${post.id}">
+                                    <i class="bi bi-heart"></i> <span th:text="${post.likes}">0</span> Likes
+                                </button>
+                                <button th:if="${post.likedBy.contains(user)}" class="btn btn-sm btn-primary me-2 unlike-btn" th:data-post-id="${post.id}">
+                                    <i class="bi bi-heart-fill"></i> <span th:text="${post.likes}">0</span> Likes
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary comment-toggle" th:data-post-id="${post.id}">
+                                    <i class="bi bi-chat"></i> <span th:text="${post.comments.size()}">0</span> Comments
+                                </button>
+                            </div>
+                            <small class="text-muted" th:if="${post.group != null}">
+                                Posted in <a th:href="@{/groups/{id}(id=${post.group.id})}" th:text="${post.group.name}">Group Name</a>
+                            </small>
+                        </div>
+
+                        <!-- Comments Section -->
+                        <div th:id="'comment-section-' + ${post.id}" class="comment-section mt-3" style="display: none;">
+                            <!-- Existing comments -->
+                            <div th:if="${!post.comments.empty}">
+                                <hr>
+                                <div th:each="comment : ${post.comments}" class="d-flex mb-2">
+                                    <img th:if="${comment.user.profilePicture}" th:src="${comment.user.profilePicture}" class="rounded-circle me-2" width="32" height="32" alt="Profile Picture" style="object-fit: cover;">
+                                    <img th:unless="${comment.user.profilePicture}" th:src="@{/images/default-profile.png}" class="rounded-circle me-2" width="32" height="32" alt="Default Profile" style="object-fit: cover;">
+                                    <div class="comment-body p-2 rounded bg-light w-100">
+                                        <div class="d-flex justify-content-between">
+                                            <small class="fw-bold" th:text="${comment.user.name}">User Name</small>
+                                            <small class="text-muted" th:text="${#temporals.format(comment.createdAt, 'MMM dd, yyyy h:mm a')}">Comment time</small>
+                                        </div>
+                                        <p class="mb-0 small" th:text="${comment.content}">Comment content</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Comment form -->
+                            <form th:action="@{/posts/{id}/comment(id=${post.id})}" method="post" class="mt-3">
+                                <div class="input-group">
+                                    <input type="text" name="content" class="form-control" placeholder="Write a comment..." required>
+                                    <button type="submit" class="btn btn-primary">Post</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <nav th:if="${posts.totalPages > 1}" aria-label="Page navigation" class="my-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${posts.first ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/posts(page=${posts.number - 1}, keyword=${param.keyword}, type=${param.type})}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <li th:each="i : ${#numbers.sequence(0, posts.totalPages - 1)}" class="page-item" th:classappend="${i == posts.number ? 'active' : ''}">
+                        <a class="page-link" th:href="@{/posts(page=${i}, keyword=${param.keyword}, type=${param.type})}" th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${posts.last ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/posts(page=${posts.number + 1}, keyword=${param.keyword}, type=${param.type})}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="fragments/layout :: footer"></footer>
+
+<div th:replace="fragments/layout :: scripts"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add click handlers for comment toggles
+        const commentToggles = document.querySelectorAll('.comment-toggle');
+        commentToggles.forEach(button => {
+            button.addEventListener('click', function() {
+                const postId = this.getAttribute('data-post-id');
+                const commentSection = document.getElementById('comment-section-' + postId);
+                if (commentSection.style.display === 'none') {
+                    commentSection.style.display = 'block';
+                } else {
+                    commentSection.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

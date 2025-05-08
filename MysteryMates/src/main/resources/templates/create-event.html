@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head('Create Event')">
+</head>
+<body>
+    <nav th:replace="fragments/layout :: navbar"></nav>
+    
+    <div class="container my-4">
+        <div th:replace="fragments/layout :: alerts"></div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="card-title mb-0"><i class="bi bi-calendar-plus"></i> Create a New Event</h4>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/events/create}" method="post" enctype="multipart/form-data" th:object="${event}">
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Event Title*</label>
+                                <input type="text" class="form-control" id="title" th:field="*{title}" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description*</label>
+                                <textarea class="form-control" id="description" th:field="*{description}" rows="4" required></textarea>
+                                <small class="text-muted">Describe what your event is about and what attendees can expect.</small>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="eventDate" class="form-label">Event Date and Time*</label>
+                                    <input type="datetime-local" class="form-control" id="eventDate" th:field="*{eventDate}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="isVirtual" class="form-label">Event Type*</label>
+                                    <select class="form-select" id="isVirtual" th:field="*{virtual}" required>
+                                        <option value="false">In-Person Event</option>
+                                        <option value="true">Virtual Event</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div id="locationGroup" class="mb-3">
+                                <label for="location" class="form-label">Location*</label>
+                                <input type="text" class="form-control" id="location" th:field="*{location}">
+                                <small class="text-muted">Enter the full address of the event location.</small>
+                            </div>
+                            
+                            <div id="virtualUrlGroup" class="mb-3" style="display: none;">
+                                <label for="virtualMeetingUrl" class="form-label">Virtual Meeting URL*</label>
+                                <input type="url" class="form-control" id="virtualMeetingUrl" th:field="*{virtualMeetingUrl}">
+                                <small class="text-muted">Enter the URL for the virtual meeting (Zoom, Google Meet, etc.).</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="eventImage" class="form-label">Event Image</label>
+                                <input type="file" class="form-control" id="eventImage" name="eventImage" accept="image/*">
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Create Event</button>
+                                <a th:href="@{/events}" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer th:replace="fragments/layout :: footer"></footer>
+    
+    <div th:replace="fragments/layout :: scripts"></div>
+    
+    <script>
+        $(document).ready(function() {
+            $('#isVirtual').change(function() {
+                if ($(this).val() === 'true') {
+                    $('#locationGroup').hide();
+                    $('#virtualUrlGroup').show();
+                    $('#location').prop('required', false);
+                    $('#virtualMeetingUrl').prop('required', true);
+                } else {
+                    $('#locationGroup').show();
+                    $('#virtualUrlGroup').hide();
+                    $('#location').prop('required', true);
+                    $('#virtualMeetingUrl').prop('required', false);
+                }
+            });
+            
+            // Trigger the change event on page load
+            $('#isVirtual').trigger('change');
+        });
+    </script>
+</body>
+</html>

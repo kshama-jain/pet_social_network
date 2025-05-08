@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head('Login')">
+</head>
+<body>
+    <nav th:replace="fragments/layout :: navbar"></nav>
+    
+    <div class="container my-5">
+        <div th:replace="fragments/layout :: alerts"></div>
+        
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="card-title mb-0"><i class="bi bi-box-arrow-in-right"></i> Login</h4>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/login}" method="post">
+                            <div class="mb-3">
+                                <label for="authMethod" class="form-label">Login Method</label>
+                                <select id="authMethod" name="authMethod" class="form-select" required>
+                                    <option value="EMAIL" selected>Email</option>
+                                    <option value="PHONE">Phone</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="username" class="form-label" id="identifierLabel">Email</label>
+                                <input type="text" class="form-control" id="username" name="identifier" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Login</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center">
+                        <span>Don't have an account? </span>
+                        <a th:href="@{/register}" class="text-primary">Register here</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer th:replace="fragments/layout :: footer"></footer>
+    
+    <div th:replace="fragments/layout :: scripts"></div>
+    
+    <script>
+        $(document).ready(function() {
+            $('#authMethod').change(function() {
+                if ($(this).val() === 'EMAIL') {
+                    $('#identifierLabel').text('Email');
+                    $('#username').attr('type', 'email');
+                } else if ($(this).val() === 'PHONE') {
+                    $('#identifierLabel').text('Phone Number');
+                    $('#username').attr('type', 'tel');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

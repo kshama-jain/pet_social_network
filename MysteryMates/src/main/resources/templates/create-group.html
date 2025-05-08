@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head('Create Group')">
+</head>
+<body>
+    <nav th:replace="fragments/layout :: navbar"></nav>
+    
+    <div class="container my-4">
+        <div th:replace="fragments/layout :: alerts"></div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="card-title mb-0"><i class="bi bi-people-fill"></i> Create a New Group</h4>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/groups/create}" method="post" enctype="multipart/form-data" th:object="${group}">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Group Name*</label>
+                                <input type="text" class="form-control" id="name" th:field="*{name}" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description*</label>
+                                <textarea class="form-control" id="description" th:field="*{description}" rows="4" required></textarea>
+                                <small class="text-muted">Describe what your group is about and who should join.</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="groupType" class="form-label">Group Type*</label>
+                                <select class="form-select" id="groupType" th:field="*{groupType}" required>
+                                    <option th:each="type : ${groupTypes}" th:value="${type}" th:text="${type}">GROUP TYPE</option>
+                                </select>
+                                <small class="text-muted">
+                                    <span>Public: Everyone can see and join.</span><br>
+                                    <span>Private: Only visible to members and by invitation.</span><br>
+                                    <span>Restricted: Visible to all, but joining requires approval.</span>
+                                </small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="groupImage" class="form-label">Group Photo</label>
+                                <input type="file" class="form-control" id="groupImage" name="groupImage" accept="image/*">
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Create Group</button>
+                                <a th:href="@{/groups}" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer th:replace="fragments/layout :: footer"></footer>
+    
+    <div th:replace="fragments/layout :: scripts"></div>
+</body>
+</html>

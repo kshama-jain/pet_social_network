@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head('Create Post')">
+</head>
+<body>
+<nav th:replace="fragments/layout :: navbar"></nav>
+
+<div class="container my-4">
+    <div th:replace="fragments/layout :: alerts"></div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="card-title mb-0"><i class="bi bi-pencil-square"></i> Create a New Post</h4>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/posts/create}" method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title*</label>
+                            <input type="text" class="form-control" id="title" name="title" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Content*</label>
+                            <textarea class="form-control" id="content" name="content" rows="5" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="postType" class="form-label">Post Type*</label>
+                            <select class="form-select" id="postType" name="postType" required>
+                                <option th:each="type : ${postTypes}" th:value="${type}" th:text="${type.name()}">POST TYPE</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3" id="mediaFileContainer">
+                            <label for="mediaFile" class="form-label">Media File</label>
+                            <input type="file" class="form-control" id="mediaFile" name="mediaFile">
+                            <small class="text-muted">Upload a photo or video based on your post type.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="groupId" class="form-label">Post to Group (Optional)</label>
+                            <select class="form-select" id="groupId" name="groupId">
+                                <option value="">Share publicly (no group)</option>
+                                <option th:each="group : ${groups}" th:value="${group.id}" th:text="${group.name}">Group Name</option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Create Post</button>
+                            <a th:href="@{/}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="fragments/layout :: footer"></footer>
+
+<div th:replace="fragments/layout :: scripts"></div>
+
+<script>
+    $(document).ready(function() {
+        $('#postType').change(function() {
+            const postType = $(this).val();
+            const mediaContainer = $('#mediaFileContainer');
+
+            if (postType === 'TEXT' || postType === 'POLL') {
+                mediaContainer.hide();
+            } else {
+                mediaContainer.show();
+                if (postType === 'PHOTO') {
+                    $('#mediaFile').attr('accept', 'image/*');
+                } else if (postType === 'VIDEO') {
+                    $('#mediaFile').attr('accept', 'video/*');
+                }
+            }
+        });
+
+        // Trigger the change event on page load
+        $('#postType').trigger('change');
+    });
+</script>
+</body>
+</html>

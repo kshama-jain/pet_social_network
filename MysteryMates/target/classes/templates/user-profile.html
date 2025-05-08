@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head('User Profile')">
+</head>
+<body>
+    <nav th:replace="fragments/layout :: navbar"></nav>
+    
+    <div class="container my-4">
+        <div th:replace="fragments/layout :: alerts"></div>
+        
+        <div class="row">
+            <!-- Profile Information -->
+            <div class="col-lg-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0"><i class="bi bi-person-circle"></i> Profile Details</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <img th:if="${user.profilePicture}" th:src="${user.profilePicture}" class="rounded-circle img-fluid mb-3" style="width: 150px; height: 150px; object-fit: cover;" alt="Profile Picture">
+                            <img th:unless="${user.profilePicture}" th:src="@{/images/default-profile.png}" class="rounded-circle img-fluid mb-3" style="width: 150px; height: 150px; object-fit: cover;" alt="Default Profile">
+                        </div>
+                        <h4 th:text="${user.name}">User Name</h4>
+                        <p class="text-muted" th:text="'@' + ${user.username}">@username</p>
+                        
+                        <div class="row text-center mt-3">
+                            <div class="col-6">
+                                <h5 th:text="${user.followers.size()}">0</h5>
+                                <p class="text-muted">Followers</p>
+                            </div>
+                            <div class="col-6">
+                                <h5 th:text="${user.following.size()}">0</h5>
+                                <p class="text-muted">Following</p>
+                            </div>
+                        </div>
+                        
+                        <div class="follow-actions mt-3">
+                            <form th:if="${!isFollowing}" th:action="@{/user/{id}/follow(id=${user.id})}" method="post">
+                                <button type="submit" class="btn btn-primary btn-block w-100">
+                                    <i class="bi bi-person-plus-fill"></i> Follow
+                                </button>
+                            </form>
+                            <form th:if="${isFollowing}" th:action="@{/user/{id}/unfollow(id=${user.id})}" method="post">
+                                <button type="submit" class="btn btn-outline-primary btn-block w-100">
+                                    <i class="bi bi-person-dash-fill"></i> Unfollow
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div class="user-details mt-4 text-start">
+                            <p th:if="${user.location}"><i class="bi bi-geo-alt-fill"></i> <span th:text="${user.location}">Location</span></p>
+                            <p th:if="${user.bio}"><i class="bi bi-file-person"></i> <span th:text="${user.bio}">Bio</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Content Tabs -->
+            <div class="col-lg-8">
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-white p-0">
+                        <ul class="nav nav-tabs nav-fill" id="profileTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="posts-tab" data-bs-toggle="tab" data-bs-target="#posts" type="button" role="tab" aria-controls="posts" aria-selected="true">
+                                    <i class="bi bi-file-post"></i> Posts
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="pets-tab" data-bs-toggle="tab" data-bs-target="#pets" type="button" role="tab" aria-controls="pets" aria-selected="false">
+                                    <i class="bi bi-github"></i> Pets
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="profileTabsContent">
+                            <!-- Posts Tab -->
+                            <div class="tab-pane fade show active" id="posts" role="tabpanel" aria-labelledby="posts-tab">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0" th:text="${user.name} + '''s Posts'">User's Posts</h5>
+                                </div>
+                                
+                                <div th:if="${posts.empty}" class="text-center py-5">
+                                    <i class="bi bi-file-earmark-text fs-1 text-muted"></i>
+                                    <h5 class="mt-3">No posts yet</h5>
+                                    <p class="text-muted">This user hasn't shared any posts</p>
+                                </div>
+                                
+                                <div th:unless="${posts.empty}" class="post-list">
+                                    <div th:each="post : ${posts}" class="card mb-3">
+                                        <div class="card-body">
+                                            <h5 class="card-title" th:text="${post.title}">Post Title</h5>
+                                            <p class="card-text" th:text="${post.content}">Post content...</p>
+                                            
+                                            <!-- Media Content (Photo or Video) -->
+                                            <div th:if="${post.mediaUrl != null}">
+                                                <img th:if="${post.postType.name() == 'PHOTO'}" th:src="${post.mediaUrl}" class="img-fluid rounded mb-3" alt="Post Image">
+                                                <video th:if="${post.postType.name() == 'VIDEO'}" controls class="img-fluid rounded mb-3">
+                                                    <source th:src="${post.mediaUrl}" type="video/mp4">
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            </div>
+                                            
+                                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                                <div>
+                                                    <span class="badge bg-primary" th:text="${post.postType.name()}">POST TYPE</span>
+                                                    <span class="text-muted small ms-2" th:text="${#temporals.format(post.createdAt, 'MMM dd, yyyy')}">Date</span>
+                                                </div>
+                                                <div>
+                                                    <button th:if="${!post.likedBy.contains(currentUser)}" class="btn btn-sm btn-outline-primary me-2 like-btn" th:data-post-id="${post.id}">
+                                                        <i class="bi bi-heart"></i> <span th:text="${post.likes}">0</span>
+                                                    </button>
+                                                    <button th:if="${post.likedBy.contains(currentUser)}" class="btn btn-sm btn-primary me-2 unlike-btn" th:data-post-id="${post.id}">
+                                                        <i class="bi bi-heart-fill"></i> <span th:text="${post.likes}">0</span>
+                                                    </button>
+                                                    <span>
+                                                        <i class="bi bi-chat-fill text-primary"></i> <span th:text="${post.comments.size()}">0</span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Pets Tab -->
+                            <div class="tab-pane fade" id="pets" role="tabpanel" aria-labelledby="pets-tab">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0" th:text="${user.name} + '''s Pets'">User's Pets</h5>
+                                </div>
+                                
+                                <div th:if="${pets.empty}" class="text-center py-5">
+                                    <i class="bi bi-github fs-1 text-muted"></i>
+                                    <h5 class="mt-3">No pets added yet</h5>
+                                    <p class="text-muted">This user hasn't added any pets</p>
+                                </div>
+                                
+                                <div th:unless="${pets.empty}" class="row">
+                                    <div th:each="pet : ${pets}" class="col-md-6 mb-3">
+                                        <div class="card h-100">
+                                            <div class="pet-image-container position-relative">
+                                                <img th:if="${pet.picture}" th:src="${pet.picture}" class="card-img-top" alt="Pet Picture" style="height: 200px; object-fit: cover;">
+                                                <img th:unless="${pet.picture}" th:src="@{/images/default-pet.png}" class="card-img-top" alt="Default Pet" style="height: 200px; object-fit: cover;">
+                                                <div class="position-absolute bottom-0 start-0 bg-primary text-white px-2 py-1">
+                                                    <span th:text="${pet.species}">Species</span>
+                                                </div>
+                                            </div>
+                                            <div class="card-body">
+                                                <h5 class="card-title" th:text="${pet.name}">Pet Name</h5>
+                                                <p class="card-text" th:if="${pet.breed}">
+                                                    <i class="bi bi-tag"></i> <span th:text="${pet.breed}">Breed</span>
+                                                </p>
+                                                <p class="card-text" th:if="${pet.age}">
+                                                    <i class="bi bi-calendar3"></i> <span th:text="${pet.age} + ' years old'">Age</span>
+                                                </p>
+                                                <p class="card-text" th:if="${pet.gender}">
+                                                    <i class="bi bi-gender-ambiguous"></i> <span th:text="${pet.gender}">Gender</span>
+                                                </p>
+                                                <p class="card-text" th:if="${pet.description}" th:text="${pet.description}">Description</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer th:replace="fragments/layout :: footer"></footer>
+    
+    <div th:replace="fragments/layout :: scripts"></div>
+</body>
+</html>

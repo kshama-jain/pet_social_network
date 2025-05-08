@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head('My Profile')">
+</head>
+<body>
+<nav th:replace="fragments/layout :: navbar"></nav>
+
+<div class="container my-4">
+    <div th:replace="fragments/layout :: alerts"></div>
+
+    <div class="row">
+        <!-- Profile Information -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0"><i class="bi bi-person-circle"></i> Profile Details</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <img th:if="${user.profilePicture}" th:src="${user.profilePicture}" class="rounded-circle img-fluid mb-3" style="width: 150px; height: 150px; object-fit: cover;" alt="Profile Picture">
+                        <img th:unless="${user.profilePicture}" th:src="@{/images/default-profile.png}" class="rounded-circle img-fluid mb-3" style="width: 150px; height: 150px; object-fit: cover;" alt="Default Profile">
+                    </div>
+                    <h4 th:text="${user.name}">User Name</h4>
+                    <p class="text-muted" th:text="'@' + ${user.username}">@username</p>
+
+                    <!-- Followers and Following section removed -->
+
+                    <div class="user-details mt-4 text-start">
+                        <p th:if="${user.email}"><i class="bi bi-envelope-fill"></i> <span th:text="${user.email}">Email</span></p>
+                        <p th:if="${user.phone}"><i class="bi bi-telephone-fill"></i> <span th:text="${user.phone}">Phone</span></p>
+                        <p th:if="${user.location}"><i class="bi bi-geo-alt-fill"></i> <span th:text="${user.location}">Location</span></p>
+                        <p th:if="${user.bio}"><i class="bi bi-file-person"></i> <span th:text="${user.bio}">Bio</span></p>
+                    </div>
+
+                    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                        <i class="bi bi-pencil-square"></i> Edit Profile
+                    </button>
+                </div>
+            </div>
+
+            <!-- Account Stats -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0"><i class="bi bi-graph-up"></i> Account Stats</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Total Posts
+                            <span class="badge bg-primary rounded-pill" th:text="${posts.size()}">0</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Pets
+                            <span class="badge bg-primary rounded-pill" th:text="${pets.size()}">0</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Groups
+                            <span class="badge bg-primary rounded-pill" th:text="${userGroups.size()}">0</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Events
+                            <span class="badge bg-primary rounded-pill" th:text="${user.events.size()}">0</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Member Since
+                            <span class="badge bg-secondary" th:text="${#temporals.format(#temporals.createNow(), 'MMM dd, yyyy')}">Date</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Tabs -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-white p-0">
+                    <ul class="nav nav-tabs nav-fill" id="profileTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="posts-tab" data-bs-toggle="tab" data-bs-target="#posts" type="button" role="tab" aria-controls="posts" aria-selected="true">
+                                <i class="bi bi-file-post"></i> Posts
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="pets-tab" data-bs-toggle="tab" data-bs-target="#pets" type="button" role="tab" aria-controls="pets" aria-selected="false">
+                                <i class="bi bi-github"></i> Pets
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="groups-tab" data-bs-toggle="tab" data-bs-target="#groups" type="button" role="tab" aria-controls="groups" aria-selected="false">
+                                <i class="bi bi-people-fill"></i> Groups
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events" type="button" role="tab" aria-controls="events" aria-selected="false">
+                                <i class="bi bi-calendar-event"></i> Events
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="profileTabsContent">
+                        <!-- Posts Tab -->
+                        <div class="tab-pane fade show active" id="posts" role="tabpanel" aria-labelledby="posts-tab">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">Your Posts</h5>
+                                <a th:href="@{/posts/create}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-plus-circle"></i> New Post
+                                </a>
+                            </div>
+
+                            <div th:if="${posts.empty}" class="text-center py-5">
+                                <i class="bi bi-file-earmark-text fs-1 text-muted"></i>
+                                <h5 class="mt-3">No posts yet</h5>
+                                <p class="text-muted">Create your first post to share with your friends</p>
+                                <a th:href="@{/posts/create}" class="btn btn-primary mt-2">Create a Post</a>
+                            </div>
+
+                            <div th:unless="${posts.empty}" class="post-list">
+                                <div th:each="post : ${posts}" class="card mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title" th:text="${post.title}">Post Title</h5>
+                                        <p class="card-text" th:text="${post.content}">Post content...</p>
+
+                                        <!-- Media Content (Photo or Video) -->
+                                        <div th:if="${post.mediaUrl != null}">
+                                            <img th:if="${post.postType.name() == 'PHOTO'}" th:src="${post.mediaUrl}" class="img-fluid rounded mb-3" alt="Post Image">
+                                            <video th:if="${post.postType.name() == 'VIDEO'}" controls class="img-fluid rounded mb-3">
+                                                <source th:src="${post.mediaUrl}" type="video/mp4">
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <div>
+                                                <span class="badge bg-primary" th:text="${post.postType.name()}">POST TYPE</span>
+                                                <span class="text-muted small ms-2" th:text="${#temporals.format(post.createdAt, 'MMM dd, yyyy')}">Date</span>
+                                            </div>
+                                            <div>
+                                                    <span class="me-2">
+                                                        <i class="bi bi-heart-fill text-danger"></i> <span th:text="${post.likes}">0</span>
+                                                    </span>
+                                                <span>
+                                                        <i class="bi bi-chat-fill text-primary"></i> <span th:text="${post.comments.size()}">0</span>
+                                                    </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pets Tab -->
+                        <div class="tab-pane fade" id="pets" role="tabpanel" aria-labelledby="pets-tab">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">Your Pets</h5>
+                                <a th:href="@{/pets/add}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-plus-circle"></i> Add Pet
+                                </a>
+                            </div>
+
+                            <div th:if="${pets.empty}" class="text-center py-5">
+                                <i class="bi bi-github fs-1 text-muted"></i>
+                                <h5 class="mt-3">No pets added yet</h5>
+                                <p class="text-muted">Add your pets to share them with your friends</p>
+                                <a th:href="@{/pets/add}" class="btn btn-primary mt-2">Add a Pet</a>
+                            </div>
+
+                            <div th:unless="${pets.empty}" class="row">
+                                <div th:each="pet : ${pets}" class="col-md-6 mb-3">
+                                    <div class="card h-100">
+                                        <div class="pet-image-container position-relative">
+                                            <img th:if="${pet.picture}" th:src="${pet.picture}" class="card-img-top" alt="Pet Picture" style="height: 200px; object-fit: cover;">
+                                            <img th:unless="${pet.picture}" th:src="@{/images/default-pet.png}" class="card-img-top" alt="Default Pet" style="height: 200px; object-fit: cover;">
+                                            <div class="position-absolute bottom-0 start-0 bg-primary text-white px-2 py-1">
+                                                <span th:text="${pet.species}">Species</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <h5 class="card-title" th:text="${pet.name}">Pet Name</h5>
+                                            <p class="card-text" th:if="${pet.breed}">
+                                                <i class="bi bi-tag"></i> <span th:text="${pet.breed}">Breed</span>
+                                            </p>
+                                            <p class="card-text" th:if="${pet.age}">
+                                                <i class="bi bi-calendar3"></i> <span th:text="${pet.age} + ' years old'">Age</span>
+                                            </p>
+                                            <p class="card-text" th:if="${pet.gender}">
+                                                <i class="bi bi-gender-ambiguous"></i> <span th:text="${pet.gender}">Gender</span>
+                                            </p>
+                                            <p class="card-text" th:if="${pet.description}" th:text="${pet.description}">Description</p>
+
+                                            <div class="d-flex justify-content-between mt-3">
+                                                <a th:href="@{/pets/{id}/edit(id=${pet.id})}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                                <form th:action="@{/pets/{id}/delete(id=${pet.id})}" method="post" class="d-inline">
+                                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Groups Tab -->
+                        <div class="tab-pane fade" id="groups" role="tabpanel" aria-labelledby="groups-tab">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">Your Groups</h5>
+                                <a th:href="@{/groups}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-people"></i> Browse Groups
+                                </a>
+                            </div>
+
+                            <div th:if="${userGroups.empty}" class="text-center py-5">
+                                <i class="bi bi-people fs-1 text-muted"></i>
+                                <h5 class="mt-3">You're not in any groups yet</h5>
+                                <p class="text-muted">Join groups to connect with other pet owners</p>
+                                <a th:href="@{/groups}" class="btn btn-primary mt-2">Find Groups</a>
+                            </div>
+
+                            <div th:unless="${userGroups.empty}" class="row">
+                                <div th:each="group : ${userGroups}" class="col-md-6 mb-3">
+                                    <div class="card h-100">
+                                        <div class="position-relative">
+                                            <img th:if="${group.pictureUrl}" th:src="${group.pictureUrl}" class="card-img-top" alt="Group Picture" style="height: 140px; object-fit: cover;">
+                                            <img th:unless="${group.pictureUrl}" th:src="@{/images/default-group.png}" class="card-img-top" alt="Default Group" style="height: 140px; object-fit: cover;">
+                                            <div class="position-absolute bottom-0 start-0 bg-primary text-white px-2 py-1">
+                                                <span th:text="${group.groupType}">Type</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <h5 class="card-title" th:text="${group.name}">Group Name</h5>
+                                            <p class="card-text" th:text="${group.description}">Group description...</p>
+                                            <div class="d-flex align-items-center mt-3">
+                                                <i class="bi bi-people-fill me-1"></i>
+                                                <span th:text="${group.members.size()} + ' members'">Members</span>
+                                            </div>
+                                            <div class="d-flex align-items-center mt-2">
+                                                <i class="bi bi-person-fill me-1"></i>
+                                                <span>Created by <span th:text="${group.creator.name}">Creator</span></span>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer bg-white">
+                                            <a th:href="@{/groups/{id}(id=${group.id})}" class="btn btn-sm btn-outline-primary w-100">View Group</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Events Tab -->
+                        <div class="tab-pane fade" id="events" role="tabpanel" aria-labelledby="events-tab">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">Your Events</h5>
+                                <a th:href="@{/events}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-calendar"></i> Browse Events
+                                </a>
+                            </div>
+
+                            <div th:if="${user.events.empty}" class="text-center py-5">
+                                <i class="bi bi-calendar-event fs-1 text-muted"></i>
+                                <h5 class="mt-3">You're not attending any events yet</h5>
+                                <p class="text-muted">Attend events to connect with other pet owners</p>
+                                <a th:href="@{/events}" class="btn btn-primary mt-2">Find Events</a>
+                            </div>
+
+                            <div th:unless="${user.events.empty}" class="row">
+                                <div th:each="event : ${user.events}" class="col-md-6 mb-3">
+                                    <div class="card h-100">
+                                        <div class="position-relative">
+                                            <img th:if="${event.pictureUrl}" th:src="${event.pictureUrl}" class="card-img-top" alt="Event Picture" style="height: 140px; object-fit: cover;">
+                                            <img th:unless="${event.pictureUrl}" th:src="@{/images/default-event.png}" class="card-img-top" alt="Default Event" style="height: 140px; object-fit: cover;">
+                                            <div class="position-absolute bottom-0 start-0 bg-primary text-white px-2 py-1">
+                                                <span th:text="${#temporals.format(event.eventDate, 'MMM dd, yyyy')}">Date</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <h5 class="card-title" th:text="${event.title}">Event Title</h5>
+                                            <p class="card-text" th:text="${event.description}">Event description...</p>
+                                            <div class="d-flex align-items-center mt-3">
+                                                <i class="bi bi-geo-alt-fill me-1"></i>
+                                                <span th:if="${event.location}" th:text="${event.location}">Location</span>
+                                                <span th:unless="${event.location}" class="text-muted">Virtual Event</span>
+                                            </div>
+                                            <div class="d-flex align-items-center mt-2">
+                                                <i class="bi bi-people-fill me-1"></i>
+                                                <span th:text="${event.attendees.size()} + ' attendees'">Attendees</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer bg-white">
+                                            <a th:href="@{/events/{id}(id=${event.id})}" class="btn btn-sm btn-outline-primary w-100">View Event</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="editProfileModalLabel"><i class="bi bi-pencil-square"></i> Edit Profile</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form th:action="@{/profile/update}" method="post" enctype="multipart/form-data">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="name" name="name" th:value="${user.name}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" th:value="${user.username}" readonly>
+                            <small class="text-muted">Username cannot be changed</small>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" th:value="${user.email}" readonly>
+                            <small class="text-muted">Email cannot be changed</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" th:value="${user.phone}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="bio" class="form-label">Bio</label>
+                        <textarea class="form-control" id="bio" name="bio" rows="3" th:text="${user.bio}"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Location</label>
+                        <input type="text" class="form-control" id="location" name="location" th:value="${user.location}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="profileImage" class="form-label">Profile Picture</label>
+                        <input type="file" class="form-control" id="profileImage" name="profileImage" accept="image/*">
+                        <small class="text-muted">Leave empty to keep current profile picture</small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="fragments/layout :: footer"></footer>
+
+<div th:replace="fragments/layout :: scripts"></div>
+</body>
+</html>

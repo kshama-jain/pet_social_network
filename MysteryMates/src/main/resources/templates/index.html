@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head('Home')">
+</head>
+<body>
+<nav th:replace="fragments/layout :: navbar"></nav>
+
+<div class="container my-4">
+    <div th:replace="fragments/layout :: alerts"></div>
+
+    <div class="row">
+        <!-- Left Sidebar -->
+        <div class="col-lg-3">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Your Profile</h5>
+                </div>
+                <div class="card-body text-center">
+                    <img th:if="${user.profilePicture}" th:src="${user.profilePicture}" class="rounded-circle img-fluid mb-3" style="width: 120px; height: 120px; object-fit: cover;" alt="Profile Picture">
+                    <img th:unless="${user.profilePicture}" th:src="@{/images/default-profile.png}" class="rounded-circle img-fluid mb-3" style="width: 120px; height: 120px; object-fit: cover;" alt="Default Profile">
+                    <h5 class="card-title" th:text="${user.name}">User Name</h5>
+                    <p class="text-muted" th:text="'@' + ${user.username}">@username</p>
+                    <p th:if="${user.bio}" th:text="${user.bio}">Bio</p>
+                    <p th:if="${user.location}"><i class="bi bi-geo-alt-fill"></i> <span th:text="${user.location}">Location</span></p>
+                    <a th:href="@{/profile}" class="btn btn-primary">View Profile</a>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Your Groups</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div th:if="${groups.empty}" class="p-3 text-center">
+                        <p class="mb-0">You haven't joined any groups yet.</p>
+                        <a th:href="@{/groups}" class="btn btn-sm btn-outline-primary mt-2">Find Groups</a>
+                    </div>
+                    <ul th:unless="${groups.empty}" class="list-group list-group-flush">
+                        <li th:each="group : ${groups}" class="list-group-item">
+                            <a th:href="@{/groups/{id}(id=${group.id})}" class="text-decoration-none">
+                                <i class="bi bi-people-fill"></i> <span th:text="${group.name}">Group Name</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-footer text-center">
+                    <a th:href="@{/groups}" class="btn btn-sm btn-primary">All Groups</a>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Upcoming Events</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div th:if="${events.empty}" class="p-3 text-center">
+                        <p class="mb-0">No upcoming events.</p>
+                        <a th:href="@{/events/create}" class="btn btn-sm btn-outline-primary mt-2">Create Event</a>
+                    </div>
+                    <ul th:unless="${events.empty}" class="list-group list-group-flush">
+                        <li th:each="event : ${events}" class="list-group-item">
+                            <a th:href="@{/events/{id}(id=${event.id})}" class="text-decoration-none">
+                                <i class="bi bi-calendar-event"></i> <span th:text="${event.title}">Event Title</span>
+                                <small class="text-muted d-block" th:text="${#temporals.format(event.eventDate, 'MMM dd, yyyy')}">Date</small>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-footer text-center">
+                    <a th:href="@{/events}" class="btn btn-sm btn-primary">All Events</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content: Feed -->
+        <div class="col-lg-9">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Create a Post</h5>
+                    <div class="d-grid">
+                        <a th:href="@{/posts/create}" class="btn btn-primary">
+                            <i class="bi bi-pencil-square"></i> What's on your mind?
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <h4 class="mb-3">Your Feed</h4>
+
+            <!-- Feed Posts -->
+            <div th:if="${posts.empty}" class="card mb-4">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-inbox-fill fs-1 text-muted"></i>
+                    <h5 class="mt-3">Your feed is empty</h5>
+                    <p class="text-muted">Follow more users or join more groups to see content here</p>
+                    <a th:href="@{/posts}" class="btn btn-primary mt-2">Explore Posts</a>
+                </div>
+            </div>
+
+            <div th:unless="${posts.empty}" class="post-feed">
+                <div th:each="post : ${posts}" class="card mb-4 post-card">
+                    <div class="card-header bg-white">
+                        <div class="d-flex align-items-center">
+                            <img th:if="${post.user.profilePicture}" th:src="${post.user.profilePicture}" class="rounded-circle me-2" width="40" height="40" alt="Profile Picture" style="object-fit: cover;">
+                            <img th:unless="${post.user.profilePicture}" th:src="@{/images/default-profile.png}" class="rounded-circle me-2" width="40" height="40" alt="Default Profile" style="object-fit: cover;">
+                            <div>
+                                <h6 class="mb-0">
+                                    <a th:href="@{/user/{id}(id=${post.user.id})}" class="text-decoration-none" th:text="${post.user.name}">User Name</a>
+                                </h6>
+                                <small class="text-muted" th:text="${#temporals.format(post.createdAt, 'MMM dd, yyyy h:mm a')}">Posted time</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${post.title}">Post Title</h5>
+                        <p class="card-text" th:text="${post.content}">Post content...</p>
+
+                        <!-- Media Content (Photo or Video) -->
+                        <div th:if="${post.mediaUrl != null}">
+                            <img th:if="${post.postType.name() == 'PHOTO'}" th:src="${post.mediaUrl}" class="img-fluid rounded mb-3" alt="Post Image">
+                            <video th:if="${post.postType.name() == 'VIDEO'}" controls class="img-fluid rounded mb-3">
+                                <source th:src="${post.mediaUrl}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+
+                        <!-- Featured Pets section removed -->
+                    </div>
+
+                    <div class="card-footer bg-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <button th:if="${!post.likedBy.contains(user)}" class="btn btn-sm btn-outline-primary me-2 like-btn" th:data-post-id="${post.id}">
+                                    <i class="bi bi-heart"></i> <span th:text="${post.likes}">0</span> Likes
+                                </button>
+                                <button th:if="${post.likedBy.contains(user)}" class="btn btn-sm btn-primary me-2 unlike-btn" th:data-post-id="${post.id}">
+                                    <i class="bi bi-heart-fill"></i> <span th:text="${post.likes}">0</span> Likes
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-chat"></i> <span th:text="${post.comments.size()}">0</span> Comments
+                                </button>
+                            </div>
+                            <small class="text-muted" th:if="${post.group != null}">
+                                Posted in <a th:href="@{/groups/{id}(id=${post.group.id})}" th:text="${post.group.name}">Group Name</a>
+                            </small>
+                        </div>
+
+                        <!-- Comments Section -->
+                        <div class="mt-3" th:if="${!post.comments.empty}">
+                            <hr>
+                            <h6>Comments</h6>
+                            <div th:each="comment : ${post.comments}" class="d-flex mb-2">
+                                <img th:if="${comment.user.profilePicture}" th:src="${comment.user.profilePicture}" class="rounded-circle me-2" width="32" height="32" alt="Profile Picture" style="object-fit: cover;">
+                                <img th:unless="${comment.user.profilePicture}" th:src="@{/images/default-profile.png}" class="rounded-circle me-2" width="32" height="32" alt="Default Profile" style="object-fit: cover;">
+                                <div class="comment-body p-2 rounded bg-light w-100">
+                                    <div class="d-flex justify-content-between">
+                                        <small class="fw-bold" th:text="${comment.user.name}">User Name</small>
+                                        <small class="text-muted" th:text="${#temporals.format(comment.createdAt, 'MMM dd, yyyy h:mm a')}">Comment time</small>
+                                    </div>
+                                    <p class="mb-0 small" th:text="${comment.content}">Comment content</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <nav th:if="${posts.totalPages > 1}" aria-label="Page navigation" class="my-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${posts.first ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/(page=${posts.number - 1})}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <li th:each="i : ${#numbers.sequence(0, posts.totalPages - 1)}" class="page-item" th:classappend="${i == posts.number ? 'active' : ''}">
+                        <a class="page-link" th:href="@{/(page=${i})}" th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${posts.last ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/(page=${posts.number + 1})}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Right Sidebar with "Who to Follow" and "Trending Topics" removed -->
+    </div>
+</div>
+
+<footer th:replace="fragments/layout :: footer"></footer>
+
+<div th:replace="fragments/layout :: scripts"></div>
+</body>
+</html>

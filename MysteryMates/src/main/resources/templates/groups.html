@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head('Groups')">
+</head>
+<body>
+    <nav th:replace="fragments/layout :: navbar"></nav>
+    
+    <div class="container my-4">
+        <div th:replace="fragments/layout :: alerts"></div>
+        
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="bi bi-people-fill"></i> Groups</h2>
+                    <a th:href="@{/groups/create}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Create Group
+                    </a>
+                </div>
+                
+
+                
+                <!-- Your Groups Section -->
+                <h4 class="mb-3">Your Groups</h4>
+                <div th:if="${userGroups.empty}" class="card mb-4">
+                    <div class="card-body text-center py-4">
+                        <i class="bi bi-people fs-1 text-muted"></i>
+                        <h5 class="mt-3">You haven't joined any groups yet</h5>
+                        <p class="text-muted">Join groups to connect with other pet owners who share your interests.</p>
+                    </div>
+                </div>
+                
+                <div th:unless="${userGroups.empty}" class="row mb-4">
+                    <div th:each="group : ${userGroups}" class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <img th:if="${group.pictureUrl}" th:src="${group.pictureUrl}" class="card-img-top" alt="Group Picture" style="height: 140px; object-fit: cover;">
+                            <img th:unless="${group.pictureUrl}" th:src="@{/images/default-group.png}" class="card-img-top" alt="Default Group" style="height: 140px; object-fit: cover;">
+                            <div class="card-body">
+                                <h5 class="card-title" th:text="${group.name}">Group Name</h5>
+                                <p class="card-text" th:text="${group.description}">Group description...</p>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="badge bg-primary" th:text="${group.groupType}">Group Type</span>
+                                    <small class="text-muted">
+                                        <i class="bi bi-people-fill"></i> <span th:text="${group.members.size()} + ' members'">Members</span>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white">
+                                <div class="d-flex justify-content-between">
+                                    <a th:href="@{/groups/{id}(id=${group.id})}" class="btn btn-sm btn-outline-primary">View</a>
+                                    <form th:action="@{/groups/{id}/leave(id=${group.id})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Leave Group</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- All Groups Section -->
+                <h4 class="mb-3">Discover Groups</h4>
+                <div th:if="${allGroups.empty}" class="card">
+                    <div class="card-body text-center py-4">
+                        <i class="bi bi-search fs-1 text-muted"></i>
+                        <h5 class="mt-3">No Groups Found</h5>
+                        <p class="text-muted">There are no groups that match your criteria.</p>
+                        <a th:href="@{/groups}" class="btn btn-primary mt-2">Clear Filters</a>
+                    </div>
+                </div>
+                
+                <div th:unless="${allGroups.empty}" class="row">
+                    <div th:each="group : ${allGroups}" class="col-md-6 mb-3" th:if="${!userGroups.contains(group)}">
+                        <div class="card h-100">
+                            <img th:if="${group.pictureUrl}" th:src="${group.pictureUrl}" class="card-img-top" alt="Group Picture" style="height: 140px; object-fit: cover;">
+                            <img th:unless="${group.pictureUrl}" th:src="@{/images/default-group.png}" class="card-img-top" alt="Default Group" style="height: 140px; object-fit: cover;">
+                            <div class="card-body">
+                                <h5 class="card-title" th:text="${group.name}">Group Name</h5>
+                                <p class="card-text" th:text="${group.description}">Group description...</p>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="badge bg-primary" th:text="${group.groupType}">Group Type</span>
+                                    <small class="text-muted">
+                                        <i class="bi bi-people-fill"></i> <span th:text="${group.members.size()} + ' members'">Members</span>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white">
+                                <form th:action="@{/groups/{id}/join(id=${group.id})}" method="post">
+                                    <button type="submit" class="btn btn-sm btn-primary w-100">Join Group</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer th:replace="fragments/layout :: footer"></footer>
+    
+    <div th:replace="fragments/layout :: scripts"></div>
+</body>
+</html>

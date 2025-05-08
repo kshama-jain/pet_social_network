@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head('Edit Pet')">
+</head>
+<body>
+<nav th:replace="fragments/layout :: navbar"></nav>
+
+<div class="container my-4">
+    <div th:replace="fragments/layout :: alerts"></div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="card-title mb-0"><i class="bi bi-heart-fill"></i> Edit Pet</h4>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/pets/{id}/update(id=${pet.id})}" method="post" enctype="multipart/form-data" th:object="${pet}">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Pet Name*</label>
+                            <input type="text" class="form-control" id="name" th:field="*{name}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="species" class="form-label">Pet Type*</label>
+                            <input type="text" class="form-control" id="species" th:field="*{species}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="breed" class="form-label">Breed</label>
+                            <input type="text" class="form-control" id="breed" th:field="*{breed}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="age" class="form-label">Age (years)*</label>
+                            <input type="number" class="form-control" id="age" th:field="*{age}" min="0" step="1" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Gender*</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="gender" id="genderMale" value="Male" th:field="*{gender}" required>
+                                <label class="form-check-label" for="genderMale">Male</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="gender" id="genderFemale" value="Female" th:field="*{gender}" required>
+                                <label class="form-check-label" for="genderFemale">Female</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" th:field="*{description}" rows="3"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="petImage" class="form-label">Pet Photo</label>
+                            <input type="file" class="form-control" id="petImage" name="petImage" accept="image/*">
+                            <small class="text-muted">Leave blank to keep the current image.</small>
+
+                            <div th:if="${pet.picture}" class="mt-2">
+                                <p class="mb-1">Current image:</p>
+                                <img th:src="${pet.picture}" class="img-thumbnail" style="max-height: 100px;" alt="Current Pet Image">
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Update Pet</button>
+                            <a th:href="@{/profile}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="fragments/layout :: footer"></footer>
+
+<div th:replace="fragments/layout :: scripts"></div>
+</body>
+</html>

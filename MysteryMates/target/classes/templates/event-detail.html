@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head('Event Details')">
+</head>
+<body>
+<nav th:replace="fragments/layout :: navbar"></nav>
+
+<div class="container my-4">
+    <div th:replace="fragments/layout :: alerts"></div>
+
+    <div class="row">
+        <!-- Event Header -->
+        <div class="col-lg-12 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <img th:if="${event.pictureUrl}" th:src="${event.pictureUrl}" class="img-fluid rounded mb-3" alt="Event Picture" style="max-height: 200px; object-fit: cover;">
+                            <img th:unless="${event.pictureUrl}" th:src="@{/images/default-event.png}" class="img-fluid rounded mb-3" alt="Default Event" style="max-height: 200px; object-fit: cover;">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h2 class="mb-0" th:text="${event.title}">Event Title</h2>
+                                <span class="badge bg-primary" th:text="${#temporals.format(event.eventDate, 'MMM dd, yyyy')}">Event Date</span>
+                            </div>
+                            <p class="text-muted mb-2">
+                                <i class="bi bi-geo-alt-fill"></i> <span th:text="${event.location}">Location</span>
+                            </p>
+                            <p class="text-muted mb-2">
+                                <i class="bi bi-clock-fill"></i> <span th:text="${#temporals.format(event.eventDate, 'hh:mm a')}">Time</span>
+                            </p>
+                            <p class="text-muted mb-2">
+                                <i class="bi bi-people-fill"></i> <span th:text="${attendeeCount} + ' attendees'">Attendees</span>
+                            </p>
+                            <p th:text="${event.description}">Event description...</p>
+
+                            <!-- Event Actions -->
+                            <div class="mt-3">
+                                <div th:if="${isAttending}">
+                                    <form th:action="@{/events/{id}/leave(id=${event.id})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-outline-danger">Cancel Attendance</button>
+                                    </form>
+                                </div>
+                                <div th:unless="${isAttending}">
+                                    <form th:action="@{/events/{id}/attend(id=${event.id})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-primary">Attend Event</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Tabs -->
+        <div class="col-lg-12">
+            <ul class="nav nav-tabs mb-4" id="eventTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details"
+                            type="button" role="tab" aria-controls="details" aria-selected="true">Details</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="attendees-tab" data-bs-toggle="tab" data-bs-target="#attendees"
+                            type="button" role="tab" aria-controls="attendees" aria-selected="false">Attendees</button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="eventTabsContent">
+                <!-- Details Tab -->
+                <div class="tab-pane fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">About this Event</h5>
+
+                            <p th:text="${event.description}" class="mb-4">Detailed event description...</p>
+
+                            <h6 class="mb-2">When and where</h6>
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="d-flex mb-3">
+                                        <div class="me-3">
+                                            <i class="bi bi-calendar-date fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <p class="mb-0 fw-bold">Date and time</p>
+                                            <p class="mb-0" th:text="${#temporals.format(event.eventDate, 'EEEE, MMMM d, yyyy')}">Date</p>
+                                            <p class="mb-0" th:text="${#temporals.format(event.eventDate, 'h:mm a')}">Time</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex mb-3">
+                                        <div class="me-3">
+                                            <i class="bi bi-geo-alt fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <p class="mb-0 fw-bold">Location</p>
+                                            <p class="mb-0" th:text="${event.location}">Location</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h6 class="mb-2">Organizer</h6>
+                            <div class="d-flex align-items-center">
+                                <img th:if="${event.creator.profilePicture}" th:src="${event.creator.profilePicture}"
+                                     class="rounded-circle me-2" width="40" height="40" alt="Creator Picture">
+                                <img th:unless="${event.creator.profilePicture}" th:src="@{/images/default-user.png}"
+                                     class="rounded-circle me-2" width="40" height="40" alt="Default User">
+                                <a th:href="@{/user/{id}(id=${event.creator.id})}" class="text-decoration-none">
+                                    <span th:text="${event.creator.username}">Creator Name</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attendees Tab -->
+                <div class="tab-pane fade" id="attendees" role="tabpanel" aria-labelledby="attendees-tab">
+                    <div class="row">
+                        <div th:each="attendee : ${event.attendees}" class="col-md-6 col-lg-4 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body d-flex align-items-center">
+                                    <img th:if="${attendee.profilePicture}" th:src="${attendee.profilePicture}"
+                                         class="rounded-circle me-3" width="60" height="60" alt="User Picture">
+                                    <img th:unless="${attendee.profilePicture}" th:src="@{/images/default-user.png}"
+                                         class="rounded-circle me-3" width="60" height="60" alt="Default User">
+                                    <div>
+                                        <h5 class="card-title mb-1" th:text="${attendee.username}">Username</h5>
+                                        <p class="card-text text-muted mb-1" th:if="${attendee.pets.size() > 0}">
+                                            <i class="bi bi-heart-fill"></i> <span th:text="${attendee.pets.size()} + ' pets'">Pets</span>
+                                        </p>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="fragments/layout :: footer"></footer>
+
+<div th:replace="fragments/layout :: scripts"></div>
+</body>
+</html>
